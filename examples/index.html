@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+        <canvas id="stream-canvas"></canvas>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const canvas = document.getElementById('stream-canvas');
+                const ctx = canvas.getContext('2d');
+                let ws;
+                function connect() {
+                    // Connect to the WebSocket server at ws://localhost:8080
+                    ws = new WebSocket('ws://localhost:8080');
+                    ws.binaryType = 'blob';
+                    ws.onmessage = (event) => {
+                        const blob = event.data;
+                        createImageBitmap(blob)
+                            .then((imageBitmap) => {
+                                // Adjust canvas size to match the video frame size on the first frame
+                                if (
+                                    canvas.width !== imageBitmap.width ||
+                                    canvas.height !== imageBitmap.height
+                                ) {
+                                    canvas.width = imageBitmap.width;
+                                    canvas.height = imageBitmap.height;
+                                }
+                                ctx.drawImage(imageBitmap, 0, 0);
+                                imageBitmap.close(); // Release memory
+                            })
+                            .catch((e) =>
+                                console.error('Error processing frame:', e)
+                            );
+                    };
+                    ws.onclose = () => {
+                        console.log(
+                            'WebSocket connection closed. Reconnecting in 3 seconds...'
+                        );
+                        // Clear the canvas to indicate disconnection
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        setTimeout(connect, 3000);
+                    };
+                }
+                connect();
+            });
+        </script>
+    </body>
+</html>

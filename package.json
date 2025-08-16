@@ -1,0 +1,12 @@
+{
+  "name": "mjpg-ws-server",
+  "version": "1.0.0",
+  "description": "A WebSocket server that proxies an MJPG stream.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.3"
+  }
+}
